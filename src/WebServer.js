@@ -19,6 +19,7 @@ module.exports = class WebServer extends EventEmitter {
     #server;
     #proxy;
     //#workers;
+    #requestHandler;
 
     constructor(config) {
         super();
