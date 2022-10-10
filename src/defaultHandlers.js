@@ -1,15 +1,11 @@
-const { cp } = require('fs');
 const url = require('url'),
     path = require('path');
-
-const { MIME_TYPES } = require('./constants');
 
 function requestHandler(request, response) {
     var uri = url.parse(request.url, true);
     var pathname = decodeURI(uri.pathname);
     var query = uri.query;
     
-    response.getMimeType = getMimeType;
     response.setRequest(request);
     request.setResponse(response);
     
@@ -45,12 +41,6 @@ function staticHandler(request, response, filename) { response.sendFile(filename
 
 /* @deprecated */
 function jsonHandler(request, response, data) { response.sendJSON(data); }
-
-function getMimeType(filename) {
-    var ext = path.extname(filename).replace(/^\./,'');
-    return MIME_TYPES.hasOwnProperty(ext) ? MIME_TYPES[ext] : "application/octet-stream";
-}
-
 
 module.exports = {
     requestHandler: requestHandler,

@@ -30,7 +30,11 @@ class WebResponse extends http.ServerResponse {
         this.end();
     }
 
-
+    getMimeType(filename) {
+        var ext = path.extname(filename).replace(/^\./,'');
+        return MIME_TYPES.hasOwnProperty(ext) ? MIME_TYPES[ext] : "application/octet-stream";
+    }
+    
     sendFile(filename) {
         fs.stat(filename, (err, stat) => {
             if(err) return this.sendResponseCode(404);
