@@ -22,11 +22,9 @@ function requestHandler(request, response) {
         return response.sendResponseCode(405);
     
     // check for route handler
-    for(var i = 0; i < this.routes.length; i++) {
-        if(this.routes[i].rx.test(pathname))
-            return this.routes[i].handler(request, response, {pathname: pathname, query: query}, this);
-    }
-
+    let handler = this.getRouteHandler(pathname);
+    if(handler != null) return handler(request, response, {pathname: pathname, query: query}, this);
+    
     // normalize to prevent directory traversal
     pathname = path.normalize(pathname);
     //console.log(`[Path]: ${pathname}`);

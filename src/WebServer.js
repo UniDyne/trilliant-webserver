@@ -51,6 +51,14 @@ module.exports = class WebServer extends EventEmitter {
         this.#routes.push({rx:rx, handler:handler});
     }
 
+    getRouteHandler(pathname) {
+        for(var i = 0; i < this.#routes.length; i++) {
+            if(this.#routes[i].rx.test(pathname))
+                return this.#routes[i].handler;
+        }
+        return null;
+    }
+
     /*
         PROPERTIES
     */
