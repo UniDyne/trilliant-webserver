@@ -1,3 +1,4 @@
+const { cp } = require('fs');
 const url = require('url'),
     path = require('path');
 
@@ -28,11 +29,12 @@ function requestHandler(request, response) {
     // normalize to prevent directory traversal
     pathname = path.normalize(pathname);
     //console.log(`[Path]: ${pathname}`);
+    
+    
     // check for virtual path
-    var vp = pathname.split(path.sep)[1];
-    if(this.virtualPaths[vp])
-        filename = path.join( this.virtualPaths[vp], pathname.replace(path.sep+vp,'') );
-    else filename = path.join( this.webroot, pathname );
+    let vp = this.getVirtualPath(pathname.split(path.sep)[1]);
+    if(vp != null) filename = path.join(vp, pathname.replace(path.sep+vp,''));
+    else filename = path.join(this.root, pathname);
 
     return staticHandler(request, response, filename);
 }

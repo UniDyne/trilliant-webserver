@@ -3,6 +3,7 @@ const
     https = require('https'),
     cluster = require('cluster'),
     EventEmitter = require("events");
+const path = require('path');
 
 const { DEFAULT_CONFIG } = require('./constants');
 const { requestHandler } = require('./defaultHandlers');
@@ -56,6 +57,12 @@ module.exports = class WebServer extends EventEmitter {
             if(this.#routes[i].rx.test(pathname))
                 return this.#routes[i].handler;
         }
+        return null;
+    }
+
+    getVirtualPath(pathname) {
+        if(this.#virtualPaths.hasOwnProperty(pathname))
+            return this.#virtualPaths[pathname];
         return null;
     }
 
