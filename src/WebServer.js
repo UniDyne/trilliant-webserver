@@ -9,6 +9,9 @@ const { DEFAULT_CONFIG } = require('./constants');
 const { requestHandler } = require('./defaultHandlers');
 const { loadExtensions } = require('./WebExtensions');
 
+const WebRequest = require('./WebRequest');
+const WebResponse = require('./WebResponse');
+
 
 module.exports = class WebServer extends EventEmitter {
 
@@ -95,9 +98,10 @@ module.exports = class WebServer extends EventEmitter {
     start() {
 
         // use subclasses of IncomingMessage and ServerResponse...
+        var props = { server: { configurable: false, enumerable: true, writable: false, value: this.#server } };
         var options = {
-            IncomingMessage: require('./WebRequest'),
-            ServerResponse: require('./WebResponse')
+            IncomingMessage: Object.create(WebRequest, props),
+            ServerResponse: Object.create(WebResponse, props)
         };
 
         if(!this.Config.secure || !this.Config.ssl) this.#server = new http.Server(options, this.#requestHandler);
