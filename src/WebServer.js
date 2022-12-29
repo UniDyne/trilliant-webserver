@@ -100,8 +100,18 @@ module.exports = class WebServer extends EventEmitter {
         // use subclasses of IncomingMessage and ServerResponse...
         var props = { server: { configurable: false, enumerable: true, writable: false, value: this.#server } };
         var options = {
-            IncomingMessage: Object.create(WebRequest, props),
-            ServerResponse: Object.create(WebResponse, props)
+            IncomingMessage: class req extends WebRequest {
+                constructor(...args) {
+                    super(...args);
+                    Object.defineProperties(this, props);
+                }
+            },
+            ServerResponse: class res extends WebResponse {
+                constructor(...args) {
+                    super(...args);
+                    Object.defineProperties(this, props);
+                }
+            }
         };
 
         if(!this.Config.secure || !this.Config.ssl) this.#server = new http.Server(options, this.#requestHandler);
