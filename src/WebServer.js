@@ -46,7 +46,10 @@ module.exports = class WebServer extends EventEmitter {
         PATHS & ROUTES
     */
 
-    registerPath(virtpath, actualpath) { this.#virtualPaths[virtpath] = actualpath; }
+    registerPath(virtpath, actualpath) {
+        if(!path.isAbsolute(actualpath)) actualpath = path.join(process.cwd(), actualpath);
+        this.#virtualPaths[virtpath] = actualpath;
+    }
 
     unregisterPath(virtpath) { delete this.#virtualPaths[virtpath]; }
 
