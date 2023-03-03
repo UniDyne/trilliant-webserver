@@ -3,7 +3,7 @@ const
     https = require('https'),
     cluster = require('cluster'),
     EventEmitter = require("events");
-const path = require('path');
+const fs = require('fs'), path = require('path');
 
 const { DEFAULT_CONFIG, MIME_TYPES } = require('./constants');
 const { requestHandler } = require('./defaultHandlers');
