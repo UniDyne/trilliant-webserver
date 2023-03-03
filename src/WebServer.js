@@ -5,12 +5,43 @@ const
     EventEmitter = require("events");
 const path = require('path');
 
-const { DEFAULT_CONFIG } = require('./constants');
+const { DEFAULT_CONFIG, MIME_TYPES } = require('./constants');
 const { requestHandler } = require('./defaultHandlers');
 const { loadExtensions } = require('./WebExtensions');
 
 const WebRequest = require('./WebRequest');
 const WebResponse = require('./WebResponse');
+
+
+
+function processConfig(config) {
+    let dir = process.cwd();
+
+
+    if(config.hasOwnProperty('rootpath'))
+        config.rootpath = path.join(dir, config.rootpath);
+    else config.rootpath = dir;
+    
+    if(config.hasOwnProperty('virtual_paths')) {
+        for(var i = 0; i < conf['virtual_paths'].length; i++) {
+            //if(!conf['virtual_paths'][i].absolute) conf['virtual_paths'][i].actual = path.join(process.cwd(), conf['virtual_paths'][i].actual);
+            this.registerPath(config['virtual_paths'][i].virtual, config['virtual_paths'][i].actual);
+        }
+    }
+
+    if(config.hasOwnProperty('mimetypes') && typeof config.mimetypes === 'string') try {
+        // merge mime type confiuration
+        Object.assign(MIME_TYPES, JSON.parse(fs.readFileSync(path.join(dir, config.mimetypes))));
+    } catch(e) { console.error(e); }
+
+    // read SSL cert data
+    if(config.hasOwnProperty('ssl') && config.secure) try {
+        config.ssl.key = fs.readFileSync(path.join(dir, config.ssl.key));
+        config.ssl.cert = fs.readFileSync(path.join(dir, config.ssl.cert));
+    } catch(e) { console.error('Failed to load SSL certificates.'); console.error(e); }
+}
+
+
 
 
 module.exports = class WebServer extends EventEmitter {
@@ -35,6 +66,8 @@ module.exports = class WebServer extends EventEmitter {
 
         this.#requestHandler = requestHandler.bind(this);
 
+        // load configuration
+        processConfig.apply(this, [this.Config]);
 
         // load extensions...
         if(this.Config.extensions && this.Config.extensions.length > 0)
