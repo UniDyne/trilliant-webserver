@@ -23,7 +23,7 @@ function processConfig(config) {
     else config.rootpath = dir;
     
     if(config.hasOwnProperty('virtual_paths')) {
-        for(var i = 0; i < conf['virtual_paths'].length; i++) {
+        for(var i = 0; i < config['virtual_paths'].length; i++) {
             //if(!conf['virtual_paths'][i].absolute) conf['virtual_paths'][i].actual = path.join(process.cwd(), conf['virtual_paths'][i].actual);
             this.registerPath(config['virtual_paths'][i].virtual, config['virtual_paths'][i].actual);
         }
