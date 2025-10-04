@@ -30,30 +30,42 @@ function ninjaHandler(request, response, uri) {
     if(request.method != "POST")
         return response.sendResponseCode(500);
     
+    
+    //## Get the event and validate before processing further.
+    let event = this.getConfig('regex').exec(uri.pathname)[1].split('/');
+
+    if(event.length > 2)
+        return response.sendResponseCode(500, "Invalid request.");
+
+    // no such channel
+    if(!this.getChannel(event[0]))
+        return response.sendResponseCode(500, "Invalid request. (47)");
+
+    // if channel only, use doc handler, if allowed
+    if(event.length == 1) {
+        if(this.getConfig('docs'))
+            return docHandler(response, this.getChannel(event[0]));
+        else return response.sendResponseCode(500, "Invalid request. (52)");
+    }
+
+    // no such event
+    if(this.getChannel(event[0]).listenerCount(event[1]) == 0)
+        return response.sendResponseCode(500, "Invalid request. (58)");
+
+
+    //## Now to get the request body and process
     try {
+
+        // TODO: need to detect multi-part post
+        // parse only the text/json part
+        // handle posted files separately
+
         // parse the post body as json
         var body = "";
         request.on('data', (chunk) => body += chunk);
         request.on('end', () => {
             var edata = JSON.parse(body), event = this.getConfig('regex').exec(uri.pathname)[1].split('/');
             
-            if(event.length > 2)
-                return response.sendResponseCode(500, "Invalid request.");
-            
-            // no such channel
-            if(!this.getChannel(event[0]))
-                    return response.sendResponseCode(500, "Invalid request. (47)");
-            
-            // if channel only, use doc handler, if allowed
-            if(event.length == 1) {
-                if(this.getConfig('docs'))
-                    return docHandler(response, this.getChannel(event[0]));
-                else return response.sendResponseCode(500, "Invalid request. (52)");
-            }
-
-            if(this.getChannel(event[0]).listenerCount(event[1]) == 0)
-                return response.sendResponseCode(500, "Invalid request. (58)");
-           
             // NOTE: Ninja methods execute OUTSIDE of the web context. This is by design.
             // The request and response scopes are not accessible from within a Ninja method.
             return this.getChannel(event[0]).emit(event[1], edata, rdata => jsonHandler(request, response, rdata));
