@@ -7,35 +7,21 @@ const fs = require('fs'),
 
 const { Cache } = require('trilliant');
 
-class Session {
+class Session extends Map {
     constructor(SID) {
-        //this.id = genSID();
+        super();
+
         if(SID) this.id = SID;
         else this.id = crypto.randomUUID();
-        
-        Object.defineProperty(this, 'data', {
-            writable: false,
-            configurable: false,
-            value: new Map()
-        });
-
-        // alias Map functions
-        this.set = this.data.set;
-        this.get = this.data.get;
-        this.has = this.data.has;
-        this.delete = this.data.delete;
-        this.clear = this.data.clear;
     }
 
-    isEmpty() {
-        return this.data.size == 0;
-    }
+    isEmpty() { return this.size == 0; }
 
     // using writeFileSync for now
     store() {
         // store non-empty session to disk
         var outfile = path.join(process.cwd(), 'sessions', `${this.id}.dat`);
-        fs.writeFileSync(outfile, JSON.stringify([...this.data]), "utf8");
+        fs.writeFileSync(outfile, JSON.stringify([...this]), "utf8");
 
         return this;
     }
@@ -45,7 +31,7 @@ class Session {
         var infile = path.join(process.cwd(), 'sessions', `${this.id}.dat`);
 
         var map = JSON.parse(fs.readFileSync(infile));
-        map.forEach(entry => this.set.apply(this.data, entry));
+        map.forEach(entry => this.set.apply(this, entry));
 
         return this;
     }
