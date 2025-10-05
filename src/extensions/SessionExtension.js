@@ -17,13 +17,29 @@ class Session extends Map {
 
     isEmpty() { return this.size == 0; }
 
+    getStoragePath() {
+        return path.join(process.cwd(), 'sessions', `${this.id}.dat`);
+    }
+
     // using writeFileSync for now
     store() {
+        if(this.size == 0)
+            return this.destroy();
+        
         // store non-empty session to disk
-        var outfile = path.join(process.cwd(), 'sessions', `${this.id}.dat`);
-        fs.writeFileSync(outfile, JSON.stringify([...this]), "utf8");
+        fs.writeFileSync(this.getStoragePath(), JSON.stringify([...this]), "utf8");
 
         return this;
+    }
+
+    destroy() {
+        this.clear();
+        // need to remove session on disk, if exists
+        let p = this.getStoragePath();
+        fs.stat(p, (err, stat) => {
+            if(err) return;
+            fs.unlink(p);
+        });
     }
     
     retrieve() {
@@ -61,12 +77,12 @@ class SessionExtension {
         var sess_id = req.Cookies.getCookie(this.COOKIE_NAME);
         
         // new session
-        if(sess_id == undefined) return req.Session = new module.exports.Session();
+        if(sess_id == undefined) return req.Session = new Session();
 
         
         var sess = this.SessionCache.get(sess_id);
         if(sess == null) {
-            sess = new module.exports.Session(sess_id);
+            sess = new Session(sess_id);
             sess.retrieve();
         }
 
@@ -78,6 +94,8 @@ class SessionExtension {
             req.Cookies.setCookie(this.COOKIE_NAME, req.Session.id); // config cookie name
             this.SessionCache.set(req.Session.id, req.Session);
         }
+        // if the session is empty... need to remove from Cache if present...
+        // this is to handle destroyed sessions
     }
 }
 
