@@ -1,20 +1,63 @@
-const { stringify } = require("querystring");
+//const { stringify } = require("querystring");
+const { decodeHeader, encodeHeader } = require('../headerUtils');
 
 
 class Cookie {
     constructor(name, value) {
         this.name = name;
         this.value = value;
+    }
 
-        this.Secure = false;
-        this.HttpOnly = false;
-        this.Expires = null;
-        this.MaxAge = null;
-        this.Path = null;
-        this.Domain = null;
+    /*
+        HttpOnly and Secure are keys without values.
+        Anything that is undefined will NOT be included in output.
+        BUT anything that is null will be output as key only.
+
+        These can't be true/false since that would prevent actual 
+        true/false values. Also, any other key that gets a null
+        value should treat it as unset (undefined).
+    */
+   
+    
+    set [expr](v) {
+        switch(expr) {
+            case 'Secure':
+            case 'HttpOnly':
+                this[expr] = (v?null:undefined);
+                break;
+            case 'Expires':
+                if(typeof v === 'object' && v.constructor === Date)
+                    this[expr] = v.toUTCString();
+                break;
+            default:
+                this[expr] = (v!=null?v:undefined);
+        }
+    }
+
+    get [expr]() {
+        switch(expr) {
+            case 'Secure':
+            case 'HttpOnly':
+                return this[expr] == null;
+            default:
+                return this[expr];
+        }
     }
 
     stringify() {
+        this[this.name] = this.value;
+
+        // encode as cookie, ensure proper key value order
+        return encodeHeader(this, [
+            this.name,
+            'Expires',
+            'Max-Age',
+            'Domain',
+            'Path',
+            'Secure',
+            'HttpOnly'
+        ]);
+
         var list = [];
 
         list.push( this.name + '=' + encodeURIComponent( this.value ) );
@@ -41,10 +84,14 @@ class Cookies {
         response.Cookies = this;
 
         var rc = request.headers.cookie;
+        if(rc) this.list = decodeHeader(rc);
+
+        /*
         rc && rc.split(';').forEach(function(cookie) {
             var parts = cookie.split(/=(.+)/);
             this.list[parts[0].trim()] = decodeURI(parts[1].trim());
         }.bind(this));
+        */
     }
 
     setCookie(name, value) {

@@ -6,6 +6,11 @@ const {ServiceWrapper} = require('trilliant');
 
 const WebServer = require('./WebServer');
 
+
+/***
+ * Service interface for use with Trilliant apps.
+ */
+
 module.exports = class TrilliantService extends ServiceWrapper {
     constructor(app, config) {
         super(app, config);
