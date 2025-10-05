@@ -17,32 +17,24 @@ class Cookie {
         true/false values. Also, any other key that gets a null
         value should treat it as unset (undefined).
     */
-   
-    
-    set [expr](v) {
-        switch(expr) {
-            case 'Secure':
-            case 'HttpOnly':
-                this[expr] = (v?null:undefined);
-                break;
-            case 'Expires':
-                if(typeof v === 'object' && v.constructor === Date)
-                    this[expr] = v.toUTCString();
-                break;
-            default:
-                this[expr] = (v!=null?v:undefined);
-        }
-    }
 
-    get [expr]() {
-        switch(expr) {
-            case 'Secure':
-            case 'HttpOnly':
-                return this[expr] == null;
-            default:
-                return this[expr];
-        }
+    set Secure(v) { this.Secure = v?null:undefined; }
+    get Secure() { return this.Secure == null; }
+
+    set HttpOnly(v) { this.HttpOnly = v?null:undefined; }
+    get HttpOnly() { return this.HttpOnly == null; }
+
+    set Expires(v) { 
+        if(typeof v === 'object' && v.constructor === Date)
+            this.Expires = v.toUTCString();
     }
+    
+    get Expires() { return new Date(this.Expires); }
+
+    set ["Max-Age"](v) { this["Max-Age"] = (v!=null?v:undefined); }
+    set Domain(v) { this.Domain = (v!=null?v:undefined); }
+    set Path(v) { this.Path = (v!=null?v:undefined); }
+    
 
     stringify() {
         this[this.name] = this.value;
