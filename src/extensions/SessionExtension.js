@@ -53,7 +53,7 @@ class SessionExtension {
         Object.defineProperty(this, 'COOKIE_NAME', {
             writable: false,
             configurable: false,
-            value: '_trilliant'
+            value: 'session'
         });
     }
 
