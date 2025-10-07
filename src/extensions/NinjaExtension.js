@@ -12,6 +12,7 @@
 const EventEmitter = require("events");
 
 const {jsonHandler} = require('../defaultHandlers');
+const { decodeHeader } = require('../headerUtils');
 
 function ninjaHandler(request, response, uri) {
     // CORS Handler
@@ -60,7 +61,13 @@ function ninjaHandler(request, response, uri) {
         // parse only the text/json part
         // handle posted files separately
 
+        let mimeType = decodeHeader(request.headers['content-type']);
+        if(mimeType == 'text/json') handleJsonRequest(request, data => {
+            return this.getChannel(event[0]).emit(event[1], data, rdata => jsonHandler(request, response, rdata));
+        });
+
         // parse the post body as json
+        /*
         var body = "";
         request.on('data', (chunk) => body += chunk);
         request.on('end', () => {
@@ -70,6 +77,7 @@ function ninjaHandler(request, response, uri) {
             // The request and response scopes are not accessible from within a Ninja method.
             return this.getChannel(event[0]).emit(event[1], edata, rdata => jsonHandler(request, response, rdata));
         });
+        */
     } catch(e) { return response.sendResponseCode(500, e); }
 }
 

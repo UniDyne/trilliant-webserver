@@ -1,5 +1,3 @@
-
-
 /*
     Mostly utility functions for reading and writing header strings
     in the correct format.
@@ -13,7 +11,7 @@
 */
 
 
-export function decodeHeader(str) {
+function decodeHeader(str) {
     const obj = {};
 
     let e = str.split(';');
@@ -28,7 +26,7 @@ export function decodeHeader(str) {
     return obj;
 }
 
-export function encodeHeader(obj, fmt) {
+function encodeHeader(obj, fmt) {
     let list = [];
 
     if(!fmt) {
@@ -53,3 +51,7 @@ export function encodeHeader(obj, fmt) {
     return list.join(';');
 }
 
+module.exports = {
+    encodeHeader,
+    decodeHeader
+};

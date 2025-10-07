@@ -1,10 +1,9 @@
-const url = require('url'),
-    path = require('path');
+//const url = require('url'),
+ const path = require('path');
 
 function requestHandler(request, response) {
-    var uri = url.parse(request.url, true);
-    var pathname = decodeURI(uri.pathname);
-    var query = uri.query;
+    var pathname = decodeURI(request.uri.pathname);
+    var query = request.uri.query;
     
     response.setRequest(request);
     request.setResponse(response);
@@ -43,7 +42,7 @@ function staticHandler(request, response, filename) { response.sendFile(filename
 function jsonHandler(request, response, data) { response.sendJSON(data); }
 
 module.exports = {
-    requestHandler: requestHandler,
-    staticHandler: staticHandler,
-    jsonHandler: jsonHandler
+    requestHandler,
+    staticHandler,
+    jsonHandler
 };
