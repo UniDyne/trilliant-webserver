@@ -6,9 +6,9 @@ class WebRequest extends http.IncomingMessage {
 
     // getter for pre-parsed URL obj
     get uri() {
-        if(!this.uri)
-            this.uri = new URL(`http://${this.headers['host'] ?? 'localhost'}${this.url}`);
-        return this.uri;
+        if(!this._uri)
+            this._uri = new URL(`http://${this.headers['host'] ?? 'localhost'}${this.url}`);
+        return this._uri;
     }
 }
 
