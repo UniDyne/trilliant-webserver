@@ -6,7 +6,7 @@ class WebRequest extends http.IncomingMessage {
     setResponse(res) { this.res = res }
 
     get uri() {
-        if(!this.#uri) this.#uri = URL.parse(this.url);
+        if(!this.#uri) this.#uri =  new URL(`http://${this.headers['host'] ?? 'localhost'}${this.url}`);
         return this.#uri;
     }
 }
