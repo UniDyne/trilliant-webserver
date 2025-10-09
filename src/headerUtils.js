@@ -14,8 +14,9 @@
 
 
 export function decodeHeader(str) {
-    const obj = {};
+    if(!str) return null;
 
+    const obj = {};
     let e = str.split(';');
     e.forEach((kv,i) => {
         // split on FIRST '=' char
