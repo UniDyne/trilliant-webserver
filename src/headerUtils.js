@@ -23,7 +23,7 @@ export function decodeHeader(str) {
         let [k,v] = kv.split(/=(.+)/);
         if(i==0 && v == undefined)
             return obj.value = k.trim();
-        else obj[k.trim()] = decodeURIComponent(v.trim());
+        else obj[k.trim()] = decodeURIComponent(v.trim().replace(/^"(.+)"$/, '$1'));
     });
 
     return obj;
