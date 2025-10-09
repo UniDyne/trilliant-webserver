@@ -2,6 +2,8 @@
     WEB EXTENSIONS
 ================================*/
 
+const path = require('path');
+
 function loadExtensions(extlist) {
     for(var i = 0; i < extlist.length; i++) try {
         if(typeof extlist[i] == "string")
