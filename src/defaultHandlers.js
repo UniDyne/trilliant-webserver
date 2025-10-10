@@ -13,14 +13,14 @@ function requestHandler(request, response) {
     
     response.on('finish', () => this.emit('requestEnd', request, response));
 
+    // check for route handler
+    let handler = this.getRouteHandler(pathname);
+    if(handler != null) return handler(request, response, {pathname: pathname, query: query}, this);
+    
     // only implementing GET and POST
     //#! add HEAD
     if(request.method != "GET" && request.method != "POST")
         return response.sendResponseCode(405);
-    
-    // check for route handler
-    let handler = this.getRouteHandler(pathname);
-    if(handler != null) return handler(request, response, {pathname: pathname, query: query}, this);
     
     // normalize to prevent directory traversal
     pathname = path.normalize(pathname);
