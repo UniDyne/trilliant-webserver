@@ -99,6 +99,7 @@ class NinjaExtension {
         // augment webserver
         webserver.registerRoute(config.regex, ninjaHandler.bind(this));
         webserver.registerChannel = (channel) => this.registerChannel(channel);
+        webserver.getChannel = (id) => this.getChannel(id);
     }
 
     getConfig(key) { return this.#config[key]; }
