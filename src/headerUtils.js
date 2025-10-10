@@ -13,7 +13,7 @@
 */
 
 
-export function decodeHeader(str) {
+function decodeHeader(str) {
     if(!str) return null;
 
     const obj = {};
@@ -29,7 +29,7 @@ export function decodeHeader(str) {
     return obj;
 }
 
-export function encodeHeader(obj, fmt) {
+function encodeHeader(obj, fmt) {
     let list = [];
 
     if(!fmt) {
@@ -54,3 +54,7 @@ export function encodeHeader(obj, fmt) {
     return list.join(';');
 }
 
+module.exports = {
+    decodeHeader,
+    encodeHeader
+};
