@@ -72,7 +72,7 @@ function ninjaHandler(request, response, uri) {
             //return this.getChannel(event[0]).emit(event[1], edata, rdata => jsonHandler(request, response, rdata));
 
             let encoder = 'sendJSON';
-            if(request.url.searchParams.hasOwnProperty('format') && request.url.searchParams['format'] == 'toon')
+            if(request.url.searchParams?.hasOwnProperty('format') && request.url.searchParams['format'] == 'toon')
                 encoder = 'sendTOON';
                 
             return this.getChannel(event[0]).emit(event[1], edata, rdata => response[encoder](rdata));

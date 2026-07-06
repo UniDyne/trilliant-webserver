@@ -4,7 +4,7 @@
     "main": "index.js",
     "dependencies": {
         "trilliant": "git+https://github.com/unidyne/trilliant.git",
-        "toon": "@toon-format/toon"
+        "@toon-format/toon": "^2.3.0"
 	},
     "repository": {
         "type": "git",
