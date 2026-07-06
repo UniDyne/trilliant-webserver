@@ -42,8 +42,9 @@ function staticHandler(request, response, filename) { response.sendFile(filename
 /* @deprecated */
 function jsonHandler(request, response, data) { response.sendJSON(data); }
 
+
 module.exports = {
-    requestHandler: requestHandler,
-    staticHandler: staticHandler,
-    jsonHandler: jsonHandler
+    requestHandler,
+    staticHandler,
+    jsonHandler
 };

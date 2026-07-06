@@ -2,6 +2,8 @@ const http = require('http'),
     fs = require('fs'),
     path = require('path');
 
+const TOON = require('@toon-format/toon');
+
 const { HTTP_MESSAGES, MIME_TYPES } = require('./constants');
 
 const MAX_CHUNK_LEN = 4 * 1024 * 1024; // 4 MB
@@ -94,6 +96,13 @@ class WebResponse extends http.ServerResponse {
         this.writeHead(200, {"Content-Type": MIME_TYPES.json});
         this.emit('headers'); /* */
         this.write(JSON.stringify(data));
+        this.end();
+    }
+
+    sendTOON(data) {
+        this.writeHead(200, {"Content-Type": MIME_TYPES.toon});
+        this.emit('headers'); /* */
+        this.write(TOON.encode(data));
         this.end();
     }
 }

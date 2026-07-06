@@ -18,6 +18,7 @@ module.exports.MIME_TYPES = {
     pdf: "application/pdf",
     png: "image/png",
     svg: "image/svg+xml",
+    toon: "text/toon",
     txt: "text/plain",
     xml: "text/xml"
 };

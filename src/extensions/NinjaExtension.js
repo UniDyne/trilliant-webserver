@@ -27,10 +27,7 @@ function ninjaHandler(request, response, uri) {
     if(request.method == "OPTIONS")
         return response.sendResponseCode(204);
 
-    if(request.method != "POST")
-        return response.sendResponseCode(500);
-    
-    
+
     //## Get the event and validate before processing further.
     let event = this.getConfig('regex').exec(uri.pathname)[1].split('/');
 
@@ -53,6 +50,10 @@ function ninjaHandler(request, response, uri) {
         return response.sendResponseCode(500, "Invalid request. (58)");
 
 
+    if(request.method != "POST")
+        return response.sendResponseCode(500);
+
+
     //## Now to get the request body and process
     try {
 
@@ -68,7 +69,13 @@ function ninjaHandler(request, response, uri) {
             
             // NOTE: Ninja methods execute OUTSIDE of the web context. This is by design.
             // The request and response scopes are not accessible from within a Ninja method.
-            return this.getChannel(event[0]).emit(event[1], edata, rdata => jsonHandler(request, response, rdata));
+            //return this.getChannel(event[0]).emit(event[1], edata, rdata => jsonHandler(request, response, rdata));
+
+            let encoder = 'sendJSON';
+            if(request.url.searchParams.hasOwnProperty('format') && request.url.searchParams['format'] == 'toon')
+                encoder = 'sendTOON';
+                
+            return this.getChannel(event[0]).emit(event[1], edata, rdata => response[encoder](rdata));
         });
     } catch(e) { return response.sendResponseCode(500, e); }
 }
