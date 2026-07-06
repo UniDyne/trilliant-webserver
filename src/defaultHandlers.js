@@ -2,20 +2,23 @@ const url = require('url'),
     path = require('path');
 
 function requestHandler(request, response) {
+    /*
     var uri = url.parse(request.url, true);
     var pathname = decodeURI(uri.pathname);
     var query = uri.query;
+    */
+    var uri = request.uri;
     
     response.setRequest(request);
     request.setResponse(response);
     
-    this.emit('requestStart', request, response, pathname);
+    this.emit('requestStart', request, response, uri.pathname);
     
     response.on('finish', () => this.emit('requestEnd', request, response));
 
     // check for route handler
-    let handler = this.getRouteHandler(pathname);
-    if(handler != null) return handler(request, response, {pathname: pathname, query: query}, this);
+    let handler = this.getRouteHandler(uri.pathname);
+    if(handler != null) return handler(request, response, uri, this);
     
     // only implementing GET and POST
     //#! add HEAD
@@ -23,7 +26,7 @@ function requestHandler(request, response) {
         return response.sendResponseCode(405);
     
     // normalize to prevent directory traversal
-    pathname = path.normalize(pathname);
+    let pathname = path.normalize(uri.pathname);
     //console.log(`[Path]: ${pathname}`);
     
     
