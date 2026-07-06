@@ -72,9 +72,18 @@ function ninjaHandler(request, response, uri) {
             //return this.getChannel(event[0]).emit(event[1], edata, rdata => jsonHandler(request, response, rdata));
 
             let encoder = 'sendJSON';
-            if(uri.searchParams.get('format') == 'toon')
-                encoder = 'sendTOON';
-                
+            switch(uri.searchParams.get('format')) {
+                case 'toon':
+                    encoder = 'sendTOON';
+                    break;
+                case 'bson':
+                    encoder = 'sendBSON';
+                    break;
+                default:
+                    encoder = 'sendJSON';
+                    break;
+            }
+             
             return this.getChannel(event[0]).emit(event[1], edata, rdata => response[encoder](rdata));
         });
     } catch(e) { return response.sendResponseCode(500, e); }

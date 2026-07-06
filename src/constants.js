@@ -7,6 +7,7 @@ module.exports.DEFAULT_CONFIG = {
 };
 
 module.exports.MIME_TYPES = {
+    bson: "application/bson",
     css: "text/css",
     gif: "image/gif",
     htm: "text/html",
