@@ -3,7 +3,6 @@ const http = require('http'),
     path = require('path');
 
 const TOON = require('@toon-format/toon');
-const {BSON} = require('bson');
 
 const { HTTP_MESSAGES, MIME_TYPES } = require('./constants');
 
@@ -106,13 +105,6 @@ class WebResponse extends http.ServerResponse {
         this.writeHead(200, {"Content-Type": MIME_TYPES.toon});
         this.emit('headers'); /* */
         this.write(TOON.encode(data));
-        this.end();
-    }
-
-    sendBSON(data) {
-        this.writeHead(200, {"Content-Type": MIME_TYPES.bson});
-        this.emit('headers'); /* */
-        this.write(BSON.serialize(data));
         this.end();
     }
 }
