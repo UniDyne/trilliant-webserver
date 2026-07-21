@@ -10,19 +10,33 @@
 ================================*/
 
 const EventEmitter = require("events");
+const { MessageEnvelope } = require("trilliant");
 
-const {jsonHandler} = require('../defaultHandlers');
+/* Define Symbols for out-of-band fields */
+const TOKEN = Symbol.for("TOKEN");
+
 
 function ninjaHandler(request, response, uri) {
     // CORS Handler
     var cors = this.getConfig('cors');
     if(cors && cors.length > 0 && request.headers['origin']) {
-        if(cors.indexOf(request.headers['origin'].replace(/^https?:\/\//,'')) >= 0) {
+        if(cors.includes(request.headers['origin'].replace(/^https?:\/\//,''))) {
             response.setHeader('Access-Control-Allow-Origin', request.headers['origin']);
             response.setHeader('Access-Control-Allow-Methods', "POST, OPTIONS");
             response.setHeader('Access-Control-Allow-Headers', "Content-Type");
         }
     }
+
+
+    /* handle a token in Auth header */
+    let token = null, request_id = null, correlation_id = null;
+    if(request.headers['authorization'] && request.headers['authorization'].startsWith('Bearer '))
+        token = request.headers['authorization'].replace(/^Bearer /, '').trim();
+
+    // we will echo request and correlation ids in responses
+    if(request.headers['x-request-id']) request_id = request.headers['x-request-id'];
+    if(request.headers['x-correlation-id']) request_id = request.headers['x-correlation-id'];
+
 
     if(request.method == "OPTIONS")
         return response.sendResponseCode(204);
@@ -66,11 +80,25 @@ function ninjaHandler(request, response, uri) {
         request.on('data', (chunk) => body += chunk);
         request.on('end', () => {
             var edata = JSON.parse(body), event = this.getConfig('regex').exec(uri.pathname)[1].split('/');
+
+            // if there is a token, need to stuff it in out-of-band field
+            if(token != null) edata[TOKEN] = token;
+
+            // do the same if there is a JWT field
+            // Yes, JWT takes precedence in this scenario
+            // backward compatibility only
+            if(Object.hasOwn(edata, 'jwt')) {
+                edata[TOKEN] = edata['jwt'];
+                delete edata['jwt'];
+            }
             
             // NOTE: Ninja methods execute OUTSIDE of the web context. This is by design.
             // The request and response scopes are not accessible from within a Ninja method.
             //return this.getChannel(event[0]).emit(event[1], edata, rdata => jsonHandler(request, response, rdata));
 
+            // EXPERIMENTAL - Response enxoder support
+            // Appropriate modules must be installed for
+            // types other than JSON
             let encoder = 'sendJSON';
             switch(uri.searchParams.get('format')) {
                 case 'toon':
@@ -84,7 +112,14 @@ function ninjaHandler(request, response, uri) {
                     break;
             }
              
-            return this.getChannel(event[0]).emit(event[1], edata, rdata => response[encoder](rdata));
+            return this.getChannel(event[0]).emit(event[1], edata, rdata => {
+                // echo identifiers
+                if(request_id) response.setHeader('X-Request-Id', request_id);
+                if(correlation_id) response.setHeader('X-Correlation-Id', correlation_id);
+
+                // send data in requested format
+                response[encoder](rdata);
+            });
         });
     } catch(e) { return response.sendResponseCode(500, e); }
 }
@@ -145,6 +180,5 @@ class Channel extends EventEmitter {
 
 module.exports = {
     WebExtension: NinjaExtension, // required
-
-    Channel: Channel
+    Channel
 };
