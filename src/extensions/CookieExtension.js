@@ -3,6 +3,9 @@ const { decodeHeader, encodeHeader } = require('../headerUtils');
 
 
 class Cookie {
+    // attribute values live in #attrs by header name
+    #attrs = {};
+
     constructor(name, value) {
         this.name = name;
         this.value = value;
@@ -18,25 +21,25 @@ class Cookie {
         value should treat it as unset (undefined).
     */
 
-    set Secure(v) { this.Secure = v?null:undefined; }
-    get Secure() { return this.Secure == null; }
+    set Secure(v) { this.#attrs.Secure = v ? null : undefined; }
+    get Secure() { return this.#attrs.Secure == null; }
 
-    set HttpOnly(v) { this.HttpOnly = v?null:undefined; }
-    get HttpOnly() { return this.HttpOnly == null; }
+    set HttpOnly(v) { this.#attrs.HttpOnly = v ? null : undefined; }
+    get HttpOnly() { return this.#attrs.HttpOnly == null; }
 
     set Expires(v) { 
-        if(typeof v === 'object' && v.constructor === Date)
-            this.Expires = v.toUTCString();
+        this.#attrs.Expires = (v instanceof Date) ? v.toUTCString() : undefined;
     }
     
-    get Expires() { return new Date(this.Expires); }
+    get Expires() { return this.#attrs.Expires === undefined ? undefined : new Date(this.#attrs.Expires); }
 
-    set ["Max-Age"](v) { this["Max-Age"] = (v!=null?v:undefined); }
-    set Domain(v) { this.Domain = (v!=null?v:undefined); }
-    set Path(v) { this.Path = (v!=null?v:undefined); }
+    set ["Max-Age"](v) { this.#attrs["Max-Age"] = ( v != null ? v : undefined ); }
+    set Domain(v) { this.#attrs.Domain = ( v != null ? v : undefined ); }
+    set Path(v) { this.#attrs.Path = ( v != null ? v : undefined ); }
     
 
     stringify() {
+        /*
         this[this.name] = this.value;
 
         // encode as cookie, ensure proper key value order
@@ -60,7 +63,15 @@ class Cookie {
         if(this.Path) list.push( 'Path=' + encodeURIComponent( this.Path ) );
         if(this.Secure) list.push( 'Secure' );
         if(this.HttpOnly) list.push( 'HttpOnly' );
-
+        */
+        const list = [ `${encodeURIComponent(this.name)}=${encodeURIComponent(this.value)}`];
+        // put the attributes in the correct order
+        // attribute keys and values are sent as-is
+        ['Expires','Max-Age','Domain','Path','Secure','HttpOnly'].forEach( k => {
+                const v = this.#attrs[k];
+                if(v === undefined) return;
+                list.push(v === null ? k : `${k}=${v}`);
+        });
         return list.join('; ');
     }
 }
@@ -87,26 +98,34 @@ class Cookies {
     }
 
     setCookie(name, value) {
-        var cookie = new module.exports.Cookie(name, value);
+        var cookie = new Cookie(name, value);
         this.pending.push(cookie);
         return cookie;
     }
 
     getCookie(name) {
-        if(this.pending[name]) return this.pending[name].value;
-        else return this.list[name];
+        //if(this.pending[name]) return this.pending[name].value;
+        //else return this.list[name];
+        const c = this.pending.find(c => c.name === name);
+        return c ? c.value : this.list[name];
     }
 
     writeCookies() {
-        this.pending.forEach((c) => this.response.setHeader('Set-Cookie', c.stringify()));
+        //this.pending.forEach((c) => this.response.setHeader('Set-Cookie', c.stringify()));
+        if(this.pending.length > 0)
+            this.response.setHeader('Set-Cookie', this.pending.map(c => c.stringify()));
     }
 }
 
 class CookieExtension {
     constructor(webserver, config) {
         // on every request, add cookie functionality
-        webserver.on('requestStart', (request, response) => new module.exports.Cookies(request, response));
-        webserver.on('headers', (response) => response.Cookies.writeCookies());
+        //webserver.on('requestStart', (request, response) => new module.exports.Cookies(request, response));
+        //webserver.on('headers', (response) => response.Cookies.writeCookies());
+        webserver.on('requestStart', (request, response) => {
+            const cookies = new Cookies(request, response);
+            response.on('headers', () => cookies.writeCookies());
+        });
     }
 }
 

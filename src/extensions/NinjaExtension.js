@@ -35,7 +35,7 @@ function ninjaHandler(request, response, uri) {
 
     // we will echo request and correlation ids in responses
     if(request.headers['x-request-id']) request_id = request.headers['x-request-id'];
-    if(request.headers['x-correlation-id']) request_id = request.headers['x-correlation-id'];
+    if(request.headers['x-correlation-id']) correlation_id = request.headers['x-correlation-id'];
 
 
     if(request.method == "OPTIONS")
@@ -166,6 +166,7 @@ class NinjaExtension {
 
 class Channel extends EventEmitter {
     constructor(id, events) {
+        super();
         this.id = id;
         var k = Object.keys(events);
         for(var i = 0, L = k.length; i < L; i++) {

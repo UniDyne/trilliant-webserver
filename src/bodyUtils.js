@@ -3,6 +3,8 @@ const fs = require('fs'),
     os = require('os'),
     crypto = require('crypto');
 
+const { decodeHeader } = require('./headerUtils');
+
 
 function bodyStreamBuffer(request, callback) {
     let body = [], len = 0;
@@ -16,11 +18,9 @@ function bodyStreamBuffer(request, callback) {
 function bodyStreamFile(filename, request, callback) {
     if(!filename) filename = path.join(os.tmpdir(), 'tmp.' + crypto.randomBytes(16).toString('hex'));
 
-    request.on('end', () => {
-        callback(filename);
-    });
     let out = fs.createWriteStream(filename);
-    out.pipe(request);
+    out.on('finish', () => callback(filename));
+    request.pipe(out);
 }
 
 
@@ -28,6 +28,8 @@ function bodyStreamFile(filename, request, callback) {
 
 
 function parseMultipart(fileInfo, callback) {
+    throw new Error('parseMultipartRequest is not implemented');
+
     const parsedData = {
         files: [],
         data: null
@@ -93,6 +95,8 @@ function handleFileRequest(request, callback) {
 }
 
 function handleMultipartRequest(request, callback) {
+    throw new Error('handleMultipartRequest is not implemented');
+
     bodyStreamFile(null, request, filename => {
         parseMultipart({
             filename: filename,
