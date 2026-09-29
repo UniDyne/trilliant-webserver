@@ -8,6 +8,13 @@ const { HTTP_MESSAGES, MIME_TYPES } = require('./constants');
 
 const MAX_CHUNK_LEN = 4 * 1024 * 1024; // 4 MB
 
+
+// basic 401 "WWW-Authenticate" header
+function getAuthHeader(data) {
+    return data && data.realm ? `Basic realm="${data.realm}"` : 'Basic realm="Restricted"';
+}
+
+
 class WebResponse extends http.ServerResponse {
 
     setStatusCode(code) { this.statusCode = code; }
