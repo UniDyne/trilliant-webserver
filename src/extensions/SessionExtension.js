@@ -95,8 +95,12 @@ class SessionExtension {
         else req.Session = this.loadSession(sess_id);
 
         req.prependListener('headers', () => {
-            if(req.Session && !req.Session.isEmpty())
-                req.Cookies.setCookie(this.COOKIE_NAME, req.Session.id).Path = '/';
+            if(req.Session && !req.Session.isEmpty()) {
+                var cookie = req.Cookies.setCookie(this.COOKIE_NAME, req.Session.id);
+                cookie.Path = '/';
+                cookie.HttpOnly = true;
+                cookie.Secure = true;
+            }
         });
 
         return req.Session;
