@@ -31,7 +31,7 @@ function requestHandler(request, response) {
     
     
     // check for virtual path
-    let dirname = pathname.split(path.sep)[1];
+    let filename, dirname = pathname.split(path.sep)[1];
     let vp = this.getVirtualPath(dirname);
     if(vp != null) filename = path.join(vp, pathname.replace(path.sep + dirname,''));
     else filename = path.join(this.root, pathname);
