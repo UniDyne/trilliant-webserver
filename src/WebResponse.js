@@ -72,18 +72,13 @@ class WebResponse extends http.ServerResponse {
             
             try {
                 if(start !== undefined && end !== undefined) {
-                  var fd = fs.openSync(filename);  
-                  fs.read(fd, Buffer.allocUnsafe(end - start), 0, end - start, start, (err, bytes, buff) => {
-                    if(err) return this.sendResponseCode(500, err);
-
                     statusOK = 206; // partial
+
+                    let bytes = Math.min(stat.size, end) - start;
                     headers["Content-Length"] = bytes;
                     headers["Content-Range"] = `bytes ${start}-${start+bytes-1}/${stat.size}`;
-                    
                     this.writeHead(statusOK, headers);
-                    this.write(buff, "binary");
-                    this.end();
-                  });
+                    fs.createReadStream(filename, {start:start, end: Math.min(stat.size, end)}).pipe(this);
                 } else {
                     this.writeHead(statusOK, headers);
                     fs.createReadStream(filename).pipe(this);
